@@ -3,7 +3,7 @@
  * Supports both emulator and production environments.
  */
 
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import * as admin from 'firebase-admin';
 import { getFirestore, Firestore, FieldValue } from 'firebase-admin/firestore';
 import { toISODateUTC, fromISODateUTC, startOfDayUTC, addDaysUTC } from './date';
 
@@ -36,12 +36,16 @@ export function initializeFirestore(): Firestore {
   }
 
   // Check if Firebase app is already initialized
-  if (getApps().length === 0) {
+  if (admin.apps.length === 0) {
     // Initialize Firebase Admin
-    // In production, GOOGLE_APPLICATION_CREDENTIALS env var should point to service account key
-    // For emulator, this will work without credentials
     try {
-      initializeApp();
+      // Load service account credentials
+      const path = require('path');
+      const serviceAccountPath = path.resolve('./firebase/unipile-ec7ec-firebase-adminsdk-fbsvc-6da41647d7.json');
+      const serviceAccount = require(serviceAccountPath);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
     } catch (error) {
       console.error('Failed to initialize Firebase Admin:', error);
       throw error;
