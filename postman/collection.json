@@ -1,0 +1,269 @@
+{
+  "info": {
+    "name": "UniPile Metrics Backend",
+    "description": "API collection for UniPile-style invitation metrics with Firestore storage",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Health check endpoint to verify service is running"
+      },
+      "response": [
+        {
+          "name": "Health Check Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2025-09-01T12:00:00.000Z\",\n  \"service\": \"unipile-metrics-backend\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Daily Invitation Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/metrics/invitations/daily?tenantId=demoTenant&accountId=demoAccount&from=2025-09-01&to=2025-09-07",
+          "host": ["{{baseUrl}}"],
+          "path": ["metrics", "invitations", "daily"],
+          "query": [
+            {
+              "key": "tenantId",
+              "value": "demoTenant",
+              "description": "Tenant identifier"
+            },
+            {
+              "key": "accountId", 
+              "value": "demoAccount",
+              "description": "Account identifier"
+            },
+            {
+              "key": "from",
+              "value": "2025-09-01",
+              "description": "Start date (YYYY-MM-DD, inclusive)"
+            },
+            {
+              "key": "to",
+              "value": "2025-09-07", 
+              "description": "End date (YYYY-MM-DD, inclusive)"
+            }
+          ]
+        },
+        "description": "Retrieves daily invitation metrics with zero-filled days and previous period comparison"
+      },
+      "response": [
+        {
+          "name": "Successful Metrics Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/invitations/daily?tenantId=demoTenant&accountId=demoAccount&from=2025-09-01&to=2025-09-07",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "invitations", "daily"],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "demoTenant"
+                },
+                {
+                  "key": "accountId",
+                  "value": "demoAccount"
+                },
+                {
+                  "key": "from",
+                  "value": "2025-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2025-09-07"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "[\n  { \"date\": \"2025-09-01\", \"value\": 3, \"status\": \"ok\", \"previousPeriodComparison\": 8 },\n  { \"date\": \"2025-09-02\", \"value\": 0, \"status\": \"ok\" },\n  { \"date\": \"2025-09-03\", \"value\": 2, \"status\": \"ok\" },\n  { \"date\": \"2025-09-04\", \"value\": 1, \"status\": \"ok\" },\n  { \"date\": \"2025-09-05\", \"value\": 4, \"status\": \"ok\" },\n  { \"date\": \"2025-09-06\", \"value\": 0, \"status\": \"ok\" },\n  { \"date\": \"2025-09-07\", \"value\": 2, \"status\": \"ok\" }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Metrics - Single Day",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/metrics/invitations/daily?tenantId=demoTenant&accountId=demoAccount&from=2025-09-01&to=2025-09-01",
+          "host": ["{{baseUrl}}"],
+          "path": ["metrics", "invitations", "daily"],
+          "query": [
+            {
+              "key": "tenantId",
+              "value": "demoTenant"
+            },
+            {
+              "key": "accountId",
+              "value": "demoAccount"
+            },
+            {
+              "key": "from",
+              "value": "2025-09-01"
+            },
+            {
+              "key": "to",
+              "value": "2025-09-01"
+            }
+          ]
+        },
+        "description": "Example of querying metrics for a single day"
+      },
+      "response": [
+        {
+          "name": "Single Day Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/invitations/daily?tenantId=demoTenant&accountId=demoAccount&from=2025-09-01&to=2025-09-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "invitations", "daily"],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "demoTenant"
+                },
+                {
+                  "key": "accountId",
+                  "value": "demoAccount"
+                },
+                {
+                  "key": "from",
+                  "value": "2025-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2025-09-01"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "[\n  { \"date\": \"2025-09-01\", \"value\": 3, \"status\": \"ok\", \"previousPeriodComparison\": 12 }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Metrics - Invalid Parameters",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/metrics/invitations/daily?tenantId=demoTenant&from=2025-09-07&to=2025-09-01",
+          "host": ["{{baseUrl}}"],
+          "path": ["metrics", "invitations", "daily"],
+          "query": [
+            {
+              "key": "tenantId",
+              "value": "demoTenant"
+            },
+            {
+              "key": "from",
+              "value": "2025-09-07"
+            },
+            {
+              "key": "to",
+              "value": "2025-09-01"
+            }
+          ]
+        },
+        "description": "Example of invalid request (missing accountId, from > to)"
+      },
+      "response": [
+        {
+          "name": "Validation Error Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metrics/invitations/daily?tenantId=demoTenant&from=2025-09-07&to=2025-09-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["metrics", "invitations", "daily"],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "demoTenant"
+                },
+                {
+                  "key": "from",
+                  "value": "2025-09-07"
+                },
+                {
+                  "key": "to",
+                  "value": "2025-09-01"
+                }
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"error\": \"Invalid query parameters\",\n  \"details\": \"accountId is required and must be a string\"\n}"
+        }
+      ]
+    }
+  ]
+}
