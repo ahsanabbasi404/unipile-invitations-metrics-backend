@@ -3,9 +3,19 @@
  * Supports both emulator and production environments.
  */
 
-import * as admin from 'firebase-admin';
-import { getFirestore, Firestore, FieldValue } from 'firebase-admin/firestore';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, Firestore, writeBatch, collection, doc, setDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { toISODateUTC, fromISODateUTC, startOfDayUTC, addDaysUTC } from './date';
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBijZ8jy-Tux8vF5mHKBZED1-EryIdvpms",
+  authDomain: "unipile-ec7ec.firebaseapp.com",
+  projectId: "unipile-ec7ec",
+  storageBucket: "unipile-ec7ec.firebasestorage.app",
+  messagingSenderId: "168344444061",
+  appId: "1:168344444061:web:64eadc5b73adadec778874"
+};
 
 // Types for our data structures
 export interface RawInvitation {
@@ -27,7 +37,7 @@ export interface InvitationQueryResult {
   count: number;
 }
 
-// Initialize Firebase Admin
+// Initialize Firebase Client
 let db: Firestore;
 
 export function initializeFirestore(): Firestore {
@@ -35,31 +45,21 @@ export function initializeFirestore(): Firestore {
     return db;
   }
 
-  // Check if Firebase app is already initialized
-  if (admin.apps.length === 0) {
-    // Initialize Firebase Admin
-    try {
-      // Load service account credentials
-      const path = require('path');
-      const serviceAccountPath = path.resolve('./firebase/unipile-ec7ec-firebase-adminsdk-fbsvc-6da41647d7.json');
-      const serviceAccount = require(serviceAccountPath);
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-      });
-    } catch (error) {
-      console.error('Failed to initialize Firebase Admin:', error);
-      throw error;
+  try {
+    // Initialize Firebase app
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    
+    // Set emulator host if running locally
+    if (process.env.FIRESTORE_EMULATOR_HOST) {
+      console.log('Using Firestore emulator at:', process.env.FIRESTORE_EMULATOR_HOST);
     }
-  }
 
-  db = getFirestore();
-  
-  // Set emulator host if running locally
-  if (process.env.FIRESTORE_EMULATOR_HOST) {
-    console.log('Using Firestore emulator at:', process.env.FIRESTORE_EMULATOR_HOST);
+    return db;
+  } catch (error) {
+    console.error('Failed to initialize Firebase:', error);
+    throw error;
   }
-
-  return db;
 }
 
 /**
@@ -68,10 +68,10 @@ export function initializeFirestore(): Firestore {
  */
 export async function writeRawInvitations(invitations: RawInvitation[]): Promise<void> {
   const firestore = initializeFirestore();
-  const batch = firestore.batch();
+  const batch = writeBatch(firestore);
 
   for (const invitation of invitations) {
-    const docRef = firestore.collection('invitations').doc(invitation.externalId);
+    const docRef = doc(collection(firestore, 'invitations'), invitation.externalId);
     // Use merge: true for idempotent writes
     batch.set(docRef, invitation, { merge: true });
   }
@@ -99,14 +99,15 @@ export async function queryInvitationsByDateRange(
   const fromTimestamp = startOfDayUTC(fromISODateUTC(fromDate));
   const toTimestamp = startOfDayUTC(addDaysUTC(fromISODateUTC(toDate), 1)); // Next day start for exclusive end
 
-  const query = firestore
-    .collection('invitations')
-    .where('tenantId', '==', tenantId)
-    .where('accountId', '==', accountId)
-    .where('receivedAt', '>=', fromTimestamp.toISOString())
-    .where('receivedAt', '<', toTimestamp.toISOString());
+  const invitationsQuery = query(
+    collection(firestore, 'invitations'),
+    where('tenantId', '==', tenantId),
+    where('accountId', '==', accountId),
+    where('receivedAt', '>=', fromTimestamp.toISOString()),
+    where('receivedAt', '<', toTimestamp.toISOString())
+  );
 
-  const snapshot = await query.get();
+  const snapshot = await getDocs(invitationsQuery);
   
   // Group by date and count
   const dateCountMap = new Map<string, number>();
@@ -136,11 +137,11 @@ export async function writeDailyRollups(
   rollups: Omit<DailyRollup, 'updatedAt'>[]
 ): Promise<void> {
   const firestore = initializeFirestore();
-  const batch = firestore.batch();
+  const batch = writeBatch(firestore);
 
   for (const rollup of rollups) {
     const docPath = `metrics/${tenantId}/accounts/${accountId}/daily/${rollup.date}`;
-    const docRef = firestore.doc(docPath);
+    const docRef = doc(firestore, docPath);
     
     const rollupWithTimestamp: DailyRollup = {
       ...rollup,
