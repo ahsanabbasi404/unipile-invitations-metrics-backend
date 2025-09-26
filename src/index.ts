@@ -9,7 +9,7 @@ import { getDailyInvitationMetrics } from './routes/metrics';
 // Environment configuration
 process.env.PORT = '3000';
 process.env.NODE_ENV = 'development';
-process.env.GOOGLE_APPLICATION_CREDENTIALS = 'd:\\Task\\data\\unipile-ec7ec-firebase-adminsdk-fbsvc-fb04d8e6d7.json';
+process.env.GOOGLE_APPLICATION_CREDENTIALS = './data/unipile-ec7ec-firebase-adminsdk-fbsvc-fb04d8e6d7.json';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
